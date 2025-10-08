@@ -1,11 +1,11 @@
 const { Router } = require('express');
-const usuarioController = require('../controllers/usuarioController');
+const adminController = require('../controllers/adminController');
 
 const routes = Router();
 
-routes.post('/', usuarioController.criar);
-routes.get('/', usuarioController.listar);
-routes.put('/:id', usuarioController.atualizar);
-routes.delete('/:id', usuarioController.deletar);
+routes.post('/', adminController.criar);
+routes.get('/', adminController.listar);
+routes.put('/:id', adminController.atualizar);
+routes.delete('/:id', adminController.deletar);
 
 module.exports = routes;

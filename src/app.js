@@ -7,6 +7,7 @@ const usuarioRoutes = require('./routes/usuarioRoutes');
 const adminRoutes = require('./routes/adminRoutes'); 
 
 const app = express();
+dotenv.config()
 
 app.use(cors());
 app.use(express.json()); 
