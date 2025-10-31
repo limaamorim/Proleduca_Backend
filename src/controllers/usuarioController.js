@@ -1,5 +1,8 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const Usuario = require('../models/Usuario');
+
+const SECRET = 'chave_secreta_super_segura'; // ideal colocar no .env
 
 module.exports = {
     async criar(req, res) {
@@ -25,7 +28,7 @@ module.exports = {
 
     async listar(req, res) {
         const usuarios = await Usuario.findAll({
-            attributes: ['id', 'nome', 'email', 'telefone', 'cpf', 'idade', 'link_indicacao']
+            attributes: ['id', 'nome', 'email', 'telefone', 'cpf', 'idade', 'senha_hash','link_indicacao', 'criado_em', 'atualizado_em']
         });
         return res.json(usuarios);
     },
@@ -53,6 +56,44 @@ module.exports = {
 
             await usuario.destroy();
             return res.json({ message: 'Usuário removido com sucesso!' });
+        } catch (err) {
+            return res.status(500).json({ error: err.message });
+        }
+    },
+
+    async login(req, res) {
+        try {
+            const { email, senha } = req.body;
+
+            const usuario = await Usuario.findOne({ where: { email } });
+            if (!usuario) {
+                return res.status(404).json({ message: 'Usuário não encontrado' });
+            }
+
+            const senhaCorreta = await bcrypt.compare(senha, usuario.senha_hash);
+            if (!senhaCorreta) {
+                return res.status(401).json({ message: 'Senha incorreta' });
+            }
+
+            const token = jwt.sign(
+                { id: usuario.id, email: usuario.email },
+                SECRET,
+                { expiresIn: '1d' }
+            );
+
+            return res.json({
+                message: 'Login bem-sucedido!',
+                token,
+                user: {
+                    id: usuario.id,
+                    nome: usuario.nome,
+                    email: usuario.email,
+                    cpf: usuario.cpf,
+                    telefone: usuario.telefone,
+                    idade: usuario.idade,
+                    link_indicacao: usuario.link_indicacao
+                }
+            });
         } catch (err) {
             return res.status(500).json({ error: err.message });
         }
