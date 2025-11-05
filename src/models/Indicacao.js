@@ -1,6 +1,6 @@
 // src/models/Indicacao.js
 const { DataTypes } = require('sequelize');
-const connection = require('../database/index').connection;
+const connection = require('../database');
 
 const Indicacao = connection.define('indicacoes', {
   id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
@@ -11,7 +11,7 @@ const Indicacao = connection.define('indicacoes', {
   validada: { type: DataTypes.BOOLEAN, defaultValue: false },
   validada_em: { type: DataTypes.DATE, allowNull: true },
   criado_em: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
-  atualizado_em: { type: DataTypes.DATE }
+  atualizado_em: { type: DataTypes.DATE },
 }, {
   timestamps: false,
   tableName: 'indicacoes'

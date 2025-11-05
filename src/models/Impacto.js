@@ -1,6 +1,6 @@
 // src/models/Impacto.js
 const { DataTypes } = require('sequelize');
-const connection = require('../database/index').connection;
+const connection = require('../database');
 
 const Impacto = connection.define('impactos', {
   id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
