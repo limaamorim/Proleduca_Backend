@@ -1,3 +1,4 @@
+// src/database/index.js
 const { Sequelize } = require('sequelize');
 const dotenv = require('dotenv');
 
@@ -16,7 +17,8 @@ const config = {
   logging: false,
 };
 
-const connection = new Sequelize(config);
+  sequelize = new Sequelize(config.database, config.username, config.password, config);
+}
 
 async function testConnection() {
   try {
