@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Usuario = require('../models/Usuario');
 
-const SECRET = 'chave_secreta_super_segura'; // ideal colocar no .env
+const SECRET = 'chave_secreta_super_segura'; 
 
 module.exports = {
     async criar(req, res) {
