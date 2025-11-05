@@ -1,3 +1,4 @@
+// src/database/index.js
 const { Sequelize } = require('sequelize');
 const dotenv = require('dotenv');
 
@@ -28,7 +29,6 @@ async function testConnection() {
     process.exit(1);
   }
 }
+ testConnection();
 
-testConnection();
-
-module.exports = connection; // <---- exporte só isso
+module.exports = { connection, testConnection };
