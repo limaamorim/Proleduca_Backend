@@ -12,5 +12,6 @@ routes.get('/', authMiddleware, adminOnly, adminController.listar);
 routes.put('/:id', authMiddleware, adminOnly, adminController.atualizar);
 routes.delete('/:id', authMiddleware, adminOnly, adminController.deletar);
 
+
 module.exports = routes;
 

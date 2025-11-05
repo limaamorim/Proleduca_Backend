@@ -29,6 +29,8 @@ async function testConnection() {
     process.exit(1);
   }
 }
- testConnection();
+
+// opcional: testar conexão ao iniciar (se quiser)
+// testConnection();
 
 module.exports = { connection, testConnection };

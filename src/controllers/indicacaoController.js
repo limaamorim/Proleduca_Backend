@@ -42,7 +42,6 @@ module.exports = {
    * Validar indicação: marca validada, recalcula impacto e adiciona pontos.
    * Tudo em uma transaction compartilhada para garantir consistência.
    */
-  // dentro de validar (assumindo authMiddleware + adminOnly rodando antes)
 async validar(req, res) {
   const id = req.params.id;
   const adminId = req.user && req.user.id ? Number(req.user.id) : null;
