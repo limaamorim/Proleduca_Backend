@@ -1,3 +1,4 @@
+// src/database/index.js
 const { Sequelize } = require('sequelize');
 const dotenv = require('dotenv');
 
@@ -29,6 +30,7 @@ async function testConnection() {
   }
 }
 
-testConnection();
+// opcional: testar conexão ao iniciar (se quiser)
+// testConnection();
 
-module.exports = connection; // <---- exporte só isso
+module.exports = { connection, testConnection };

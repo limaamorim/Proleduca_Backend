@@ -1,6 +1,7 @@
 // src/models/Indicacao.js
 const { DataTypes } = require('sequelize');
-const connection = require('../database');
+const { connection } = require('../database');
+
 
 const Indicacao = connection.define('indicacoes', {
   id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
@@ -17,7 +18,7 @@ const Indicacao = connection.define('indicacoes', {
   tableName: 'indicacoes'
 });
 
-// hooks
+// hooks para manter atualizado_em consistente
 Indicacao.beforeCreate((inst) => {
   inst.criado_em = inst.criado_em || new Date();
   inst.atualizado_em = new Date();

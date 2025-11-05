@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
-const connection = require('../database'); // importa direto, sem .connection
+const { connection } = require('../database');
+
 
 // Definição da tabela "usuarios"
 const Usuario = connection.define('usuarios', {
