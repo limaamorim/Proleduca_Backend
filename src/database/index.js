@@ -17,8 +17,7 @@ const config = {
   logging: false,
 };
 
-  sequelize = new Sequelize(config.database, config.username, config.password, config);
-}
+const connection = new Sequelize(config);
 
 async function testConnection() {
   try {
@@ -31,6 +30,7 @@ async function testConnection() {
   }
 }
 
-testConnection();
+// opcional: testar conexão ao iniciar (se quiser)
+// testConnection();
 
-module.exports = connection; // <---- exporte só isso
+module.exports = { connection, testConnection };

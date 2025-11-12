@@ -1,6 +1,7 @@
 // src/models/Indicacao.js
 const { DataTypes } = require('sequelize');
-const connection = require('../database');
+const { connection } = require('../database');
+
 
 const Indicacao = connection.define('indicacoes', {
   id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },

@@ -1,6 +1,7 @@
 // src/models/Gamificacao.js
 const { DataTypes } = require('sequelize');
-const connection = require('../database');
+const { connection } = require('../database');
+
 
 const Gamificacao = connection.define('gamificacao', {
   id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },

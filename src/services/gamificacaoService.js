@@ -1,6 +1,6 @@
 // src/services/gamificacaoService.js
 const Gamificacao = require('../models/Gamificacao');
-const connection = require('../database/index').connection;
+const { connection } = require('../database');
 
 /**
  * Simples regra de pontos para próximo nível; parametrizável no futuro.
