@@ -1,6 +1,6 @@
 // src/controllers/impactoController.js
 const Impacto = require('../models/Impacto');
-const impactService = require('../services/impactServices');
+const impactService = require('../services/impactoService');
 
 module.exports = {
   async obterPorUsuario(req, res) {

@@ -27,8 +27,8 @@ const Usuario = connection.define('usuarios', {
     allowNull: false, 
     unique: true 
   },
-  idade: { 
-    type: DataTypes.INTEGER, 
+  data_nascimento: { 
+    type: DataTypes.DATEONLY, 
     allowNull: true 
   },
   senha_hash: { 
@@ -40,6 +40,10 @@ const Usuario = connection.define('usuarios', {
     allowNull: true, 
     unique: true 
   },
+  suspended: {
+  type: DataTypes.BOOLEAN,
+  defaultValue: false
+},
   criado_em: { 
     type: DataTypes.DATE, 
     defaultValue: DataTypes.NOW 

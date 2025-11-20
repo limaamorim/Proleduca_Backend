@@ -1,6 +1,6 @@
 // src/controllers/indicacaoController.js
 const Indicacao = require('../models/Indicacao');
-const impactService = require('../services/impactServices');
+const impactService = require('../services/impactoService');
 const gamService = require('../services/gamificacaoService');
 const Config = require('../models/ConfigGamificacao');
 const { connection } = require('../database/index');
