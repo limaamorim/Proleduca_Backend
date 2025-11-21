@@ -3,6 +3,7 @@ const Indicacao = require('../models/Indicacao');
 const impactService = require('../services/impactoService');
 const gamService = require('../services/gamificacaoService');
 const Config = require('../models/ConfigGamificacao');
+const metaService = require('../services/metaService');
 const { connection } = require('../database/index');
 
 module.exports = {
@@ -55,12 +56,15 @@ async validar(req, res) {
       // marcar como validada e registrar quem validou (admin)
       indicacao.validada = true;
       indicacao.validada_em = new Date();
-      indicacao.validada_por_admin_id = adminId; // auditoria
+      indicacao.validada_por_admin_id = adminId;
       indicacao.atualizado_em = new Date();
       await indicacao.save({ transaction: t });
 
       // recalcula impacto usando a mesma transaction
       const impacto = await impactService.recomputeImpactForUser(indicacao.usuario_id, t);
+
+      await metaService.evaluateMetasForUser(indicacao.usuario_id, t);
+
 
       // buscar pontos por indicação na config (se existir)
       const cfg = await Config.findOne({ where: { chave: 'pontos_por_indicacao' }, transaction: t });

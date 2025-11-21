@@ -7,6 +7,6 @@ const routes = Router();
 routes.post('/', createUserRules, usuarioController.criar);
 routes.get('/', usuarioController.listar);
 routes.put('/:id', usuarioController.atualizar);
-
+routes.get('/:id', usuarioController.obter);
 
 module.exports = routes;

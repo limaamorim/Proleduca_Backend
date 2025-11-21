@@ -80,8 +80,54 @@ async function canUserWithdraw(usuarioId) {
   return { pode_sacar: renda >= minimo, renda, minimo };
 }
 
+
+async function addReward(usuarioId, amount, externalTransaction = null) {
+  if (!usuarioId) throw new Error('usuarioId é obrigatório');
+  const valorNum = Number(amount || 0);
+  if (isNaN(valorNum) || valorNum <= 0) return null;
+
+  let t;
+  let createdTx = false;
+  try {
+    if (externalTransaction) {
+      t = externalTransaction;
+    } else {
+      t = await connection.transaction();
+      createdTx = true;
+    }
+
+    // Tenta achar impacto
+    let impacto = await Impacto.findOne({ where: { usuario_id: usuarioId }, transaction: t });
+
+    if (!impacto) {
+      impacto = await Impacto.create({
+        usuario_id: usuarioId,
+        indicacoes_count: 0,
+        bolsas_concedidas: 1,
+        renda_gerada: valorNum,
+        criado_em: new Date(),
+        atualizado_em: new Date()
+      }, { transaction: t });
+    } else {
+      // incrementa renda e bolsas
+      const novaRenda = Number(impacto.renda_gerada || 0) + valorNum;
+      impacto.renda_gerada = novaRenda;
+      impacto.bolsas_concedidas = Number(impacto.bolsas_concedidas || 0) + 1;
+      impacto.atualizado_em = new Date();
+      await impacto.save({ transaction: t });
+    }
+
+    if (createdTx) await t.commit();
+    return impacto;
+  } catch (err) {
+    if (createdTx && t) await t.rollback();
+    throw err;
+  }
+}
+
 module.exports = {
   recomputeImpactForUser,
   canUserWithdraw,
-  calcularTotalMonetario
+  calcularTotalMonetario,
+  addReward
 };

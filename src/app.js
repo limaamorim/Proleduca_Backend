@@ -6,11 +6,14 @@ const dotenv = require('dotenv');
 const configRoutes = require('./routes/configGamificacaoRoutes');
 const authRoutes = require('./routes/authRoutes'); 
 const usuarioRoutes = require('./routes/usuarioRoutes'); 
+const rankingRoutes = require('./routes/rankingRoutes');
 const adminRoutes = require('./routes/adminRoutes'); 
 const indicacaoRoutes = require('./routes/indicacaoRoutes');
 const impactoRoutes = require('./routes/impactoRoutes');
+const metaRoutes = require('./routes/metaRoutes');
 const gamificacaoRoutes = require('./routes/gamificacaoRoutes');
 const adminUserRoutes = require('./routes/adminUserRoutes');
+
 
 
 const app = express();
@@ -25,10 +28,12 @@ app.get('/', (req, res) => {
 
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/usuarios', usuarioRoutes);
+app.use('/api/v1/ranking', rankingRoutes);
 app.use('/api/v1/admins', adminRoutes);
 app.use('/api/v1/admins/users', adminUserRoutes);
 app.use('/api/v1/indicacoes', indicacaoRoutes);
 app.use('/api/v1/impactos', impactoRoutes);
+app.use('/api/v1/metas', metaRoutes);
 app.use('/api/v1/gamificacao', gamificacaoRoutes);
 app.use('/api/v1/config', configRoutes);
 
