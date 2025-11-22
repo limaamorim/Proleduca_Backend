@@ -11,6 +11,7 @@ const Indicacao = connection.define('indicacoes', {
   data_indicacao: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
   validada: { type: DataTypes.BOOLEAN, defaultValue: false },
   validada_em: { type: DataTypes.DATE, allowNull: true },
+  validada_por_admin_id: { type: DataTypes.INTEGER, allowNull: true },
   criado_em: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
   atualizado_em: { type: DataTypes.DATE },
 }, {
