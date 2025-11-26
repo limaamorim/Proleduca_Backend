@@ -34,7 +34,7 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/usuarios', usuarioRoutes);
 app.use('/api/v1/ranking', rankingRoutes);
 app.use('/api/v1/admins', adminRoutes);
-app.use('/api/v1/admins/users', adminUserRoutes);
+app.use('/api/v1/admins/usuario', adminUserRoutes);
 app.use('/api/v1/indicacoes', indicacaoRoutes);
 app.use('/api/v1/impactos', impactoRoutes);
 app.use('/api/v1/metas', metaRoutes);

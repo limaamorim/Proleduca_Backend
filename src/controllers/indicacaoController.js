@@ -100,13 +100,13 @@ module.exports = {
         // Atualiza impacto
         const impacto = await impactoService.recalcularImpactoUsuario(
           indicacao.usuario_id,
-          t
+           transacao
         );
 
         // Avalia metas do usuário
         await metaService.avaliarMetasDoUsuario(
           indicacao.usuario_id,
-          t
+           transacao
         );
 
         // Busca configuração opcional de pontos

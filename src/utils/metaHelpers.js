@@ -3,20 +3,27 @@ const { Op } = require('sequelize');
 const Meta = require('../models/Meta');
 const UsuarioMeta = require('../models/UsuarioMeta');
 const Indicacao = require('../models/Indicacao');
-const Gamificacao = require('../models/Gamificacao'); // usar para incrementar metas_batidas manualmente
-
+const Gamificacao = require('../models/Gamificacao');
 const impactoService = require('../services/impactoService');
 const gamificacaoService = require('../services/gamificacaoService');
 
 /**
- * Compatibilidade: tentar funções em PT/EN como fallback
+ * Fallbacks robustos para funções de serviço (PT 
  */
 const impactoAdicionarRecompensa =
-  impactoService.adicionarRecompensa 
-
+  (impactoService && (impactoService.adicionarRecompensa)) 
 
 const gamificacaoAdicionarPontos =
-  gamificacaoService.adicionarPontos 
+  (gamificacaoService && (gamificacaoService.adicionarPontos)) 
+
+/**
+ * Fallbacks robustos para funções de serviço (PT / EN)
+ */
+const impactoAdicionarRecompensa =
+  (impactoService && (impactoService.adicionarRecompensa || impactoService.addReward || impactoService.add_recompensa)) || null;
+
+const gamificacaoAdicionarPontos =
+  (gamificacaoService && (gamificacaoService.adicionarPontos || gamificacaoService.addPoints || gamificacaoService.addPontos || gamificacaoService.adicionarPontos)) || null;
 
 /**
  * Retorna metas ativas (considerando validade) dentro de uma transação opcional
@@ -85,24 +92,27 @@ async function obterOuCriarUsuarioMeta(usuarioId, metaId, transacao = null) {
 
 /**
  * Atualiza usuario_meta e detecta transição para completado (newlyCompleted)
+ * Retorna { usuarioMetaAtualizado, newlyCompleted }
  */
 async function atualizarUsuarioMeta(usuarioMeta, qtdValidadas, meta, janela = null, transacao = null) {
   let precisarResetar = false;
+  let periodoInicio = null, periodoFim = null;
   if (janela) {
-    const periodoInicio = janela.inicio;
+    periodoInicio = janela.inicio;
+    periodoFim = janela.fim;
     if (!usuarioMeta.periodo_inicio || new Date(usuarioMeta.periodo_inicio).getTime() < periodoInicio.getTime()) {
       precisarResetar = true;
     }
   }
 
   const estavaCompleta = Boolean(usuarioMeta.completado);
-  let recemCompletado = false;
+  let newlyCompleted = false;
 
   if (precisarResetar) {
     const completada = qtdValidadas >= meta.alvo_indicacoes;
     usuarioMeta.progresso_indicacoes = qtdValidadas;
-    usuarioMeta.periodo_inicio = janela ? janela.inicio : null;
-    usuarioMeta.periodo_fim = janela ? janela.fim : null;
+    usuarioMeta.periodo_inicio = periodoInicio;
+    usuarioMeta.periodo_fim = periodoFim;
     usuarioMeta.completado = completada;
     usuarioMeta.ganho = completada ? Number(meta.recompensa) : 0.00;
   } else {
@@ -111,12 +121,12 @@ async function atualizarUsuarioMeta(usuarioMeta, qtdValidadas, meta, janela = nu
     usuarioMeta.ganho = usuarioMeta.completado ? Number(meta.recompensa) : 0.00;
   }
 
-  if (!estavaCompleta && usuarioMeta.completado) recemCompletado = true;
+  if (!estavaCompleta && usuarioMeta.completado) newlyCompleted = true;
 
   usuarioMeta.atualizado_em = new Date();
   await usuarioMeta.save({ transaction: transacao });
 
-  return { usuarioMetaAtualizado: usuarioMeta, recemCompletado };
+  return { usuarioMetaAtualizado: usuarioMeta, newlyCompleted };
 }
 
 /**
@@ -129,7 +139,7 @@ async function aplicarRecompensaSeNecessaria(usuarioId, usuarioMeta, meta, trans
 
   // 1) Impacto — usa a função disponível
   if (!impactoAdicionarRecompensa) {
-    throw new Error('Função de adicionar recompensa não encontrada em impactoService. Verifique exports.');
+    throw new Error('Função de adicionar recompensa não encontrada em impactoService. Verifique exports e nome do arquivo.');
   }
   await impactoAdicionarRecompensa(usuarioId, Number(meta.recompensa), transacao);
 
@@ -138,20 +148,18 @@ async function aplicarRecompensaSeNecessaria(usuarioId, usuarioMeta, meta, trans
   let resultadoGamificacao = null;
   if (pontos > 0) {
     if (!gamificacaoAdicionarPontos) {
-      throw new Error('Função de adicionar pontos não encontrada em gamificacaoService. Verifique exports.');
+      throw new Error('Função de adicionar pontos não encontrada em gamificacaoService. Verifique exports e nome do arquivo.');
     }
     resultadoGamificacao = await gamificacaoAdicionarPontos(usuarioId, pontos, null, transacao);
   }
 
   // 3) Garantir incremento de metas_batidas:
-  // - se gam service indicou leveled/subiuDeNivel => gam já incrementou metas_batidas
-  // - se não indicou, incrementamos manualmente (dentro da mesma transação)
   const subiu = resultadoGamificacao && (resultadoGamificacao.subiuDeNivel === true || resultadoGamificacao.leveled === true);
   if (!subiu) {
     // localizar registro de gamificacao e incrementar metas_batidas em transacao
     const gamificacao = await Gamificacao.findOne({ where: { usuario_id: usuarioId }, transaction: transacao });
     if (gamificacao) {
-      gamificacao.metas_batidas = Number(g.metas_batidas || 0) + 1;
+      gamificacao.metas_batidas = Number(gamificacao.metas_batidas || 0) + 1;
       gamificacao.atualizado_em = new Date();
       await gamificacao.save({ transaction: transacao });
     } else {

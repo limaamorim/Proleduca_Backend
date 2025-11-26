@@ -5,9 +5,6 @@ const metaHelpers = require('../utils/metaHelpers');
 /**
  * Reavalia TODAS as metas do usuário e atualiza usuario_metas.
  * Pode operar dentro de uma transação externa.
- *
- * Mantém compatibilidade com o nome português (avaliarMetasDoUsuario)
- * e com o nome antigo/inglês (evaluateMetasForUser).
  */
 async function avaliarMetasDoUsuario(usuarioId, transacaoExterna = null) {
   if (!usuarioId) throw new Error('usuarioId é obrigatório');

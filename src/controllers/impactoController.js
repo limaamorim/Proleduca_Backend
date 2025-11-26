@@ -13,13 +13,13 @@ module.exports = {
 
       // se não existir, recalcula (gera/atualiza impacto) e busca novamente
       if (!impacto) {
-        await impactService.recomputeImpactForUser(usuario_id);
+        await impactService.recalcularImpactoUsuario(usuario_id);
         impacto = await Impacto.findOne({ where: { usuario_id } });
       }
 
       if (!impacto) return res.status(404).json({ error: 'Impacto não encontrado' });
 
-      const { pode_sacar, renda, minimo } = await impactService.canUserWithdraw(usuario_id);
+      const { pode_sacar, renda, minimo } = await impactService.usuarioPodeSacar(usuario_id);
       return res.json({ impacto, pode_sacar, renda, minimo });
     } catch (err) {
       return res.status(500).json({ error: err.message });

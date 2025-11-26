@@ -9,7 +9,7 @@ module.exports = {
       const usuario_id = req.params.usuario_id;
 
       const gamificacao = await gamificacaoService.buscarPorUsuario(usuario_id);
-      const pontosProximoNivel = gamificacaoService.pontosParaProximoNivel(gamificacao.nivel);
+      const pontosProximoNivel = gamificacaoService.pontosNecessariosParaProximoNivel(gamificacao.nivel);
 
       return res.json({
         usuario_id: gamificacao.usuario_id,
