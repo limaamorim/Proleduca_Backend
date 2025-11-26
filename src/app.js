@@ -13,6 +13,7 @@ const impactoRoutes = require('./routes/impactoRoutes');
 const metaRoutes = require('./routes/metaRoutes');
 const gamificacaoRoutes = require('./routes/gamificacaoRoutes');
 const adminUserRoutes = require('./routes/adminUserRoutes');
+const resetSenhaRoutes = require('./routes/resetSenhaRoutes');
 const { generalLimiter, authLimiter } = require('./middlewares/rateLimiter');
 
 
@@ -34,11 +35,13 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/usuarios', usuarioRoutes);
 app.use('/api/v1/ranking', rankingRoutes);
 app.use('/api/v1/admins', adminRoutes);
-app.use('/api/v1/admins/usuario', adminUserRoutes);
+app.use('/api/v1/admins/users', adminUserRoutes);
 app.use('/api/v1/indicacoes', indicacaoRoutes);
 app.use('/api/v1/impactos', impactoRoutes);
 app.use('/api/v1/metas', metaRoutes);
 app.use('/api/v1/gamificacao', gamificacaoRoutes);
 app.use('/api/v1/config', configRoutes);
+app.use('/api/v1/recuperar-senha', resetSenhaRoutes);
+
 
 module.exports = app;
