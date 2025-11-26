@@ -1,8 +1,6 @@
 const { DataTypes } = require('sequelize');
 const { connection } = require('../database');
 
-
-// Definição da tabela "usuarios"
 const Usuario = connection.define('usuarios', {
   id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
   nome: { type: DataTypes.STRING(100), allowNull: false },
@@ -12,11 +10,16 @@ const Usuario = connection.define('usuarios', {
   data_nascimento: { type: DataTypes.DATEONLY, allowNull: true },
   senha_hash: { type: DataTypes.STRING(255), allowNull: false },
   link_indicacao: { type: DataTypes.STRING(255), allowNull: true, unique: true },
-  suspenso: {type: DataTypes.BOOLEAN,defaultValue: false,field: 'suspended'},
+
+  // CAMPOS DA RECUPERAÇÃO DE SENHA
+  reset_code: { type: DataTypes.STRING, allowNull: true },
+  reset_expires: { type: DataTypes.DATE, allowNull: true },
+
+  suspenso: { type: DataTypes.BOOLEAN, defaultValue: false, field: 'suspended' },
   criado_em: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
   atualizado_em: { type: DataTypes.DATE }
 }, {
-  timestamps: false  // ✅ desativa createdAt / updatedAt automáticos
+  timestamps: false
 });
 
 module.exports = Usuario;
