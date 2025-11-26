@@ -1,85 +1,118 @@
 # 🚀 Amigo Edu Backend
 
-Este é o backend da plataforma **Amigo Edu**, desenvolvido em **Node.js + Express** com **PostgreSQL** e **Sequelize**.  
-O objetivo é gerenciar usuários, autenticação e futuras funcionalidades de gamificação.
+> Backend robusto para a plataforma **Amigo Edu**, focado em gestão de indicações, cálculo de impacto social/financeiro e gamificação de usuários.
+
+Este projeto é uma **API RESTful** desenvolvida em **Node.js** com arquitetura **MVC + Services**, utilizando **PostgreSQL** para persistência de dados. O sistema gerencia todo o ciclo de vida do usuário, desde a autenticação segura até a progressão de níveis baseada em metas e indicações.
 
 ---
 
-## 🛠️ Tecnologias
+## 📋 Índice
 
-- **Node.js** – Ambiente de execução
-- **Express** – Framework web para APIs REST
-- **Sequelize** – ORM para PostgreSQL
-- **PostgreSQL** – Banco de dados relacional
-- **dotenv** – Gerenciamento de variáveis de ambiente
-- **Nodemon** – Hot reload em desenvolvimento
+- [Funcionalidades](#-funcionalidades)
+- [Tecnologias Utilizadas](#-tecnologias-utilizadas)
+- [Arquitetura do Projeto](#-arquitetura-do-projeto)
+- [Pré-requisitos e Instalação](#-pré-requisitos-e-instalação)
+- [Configuração (.env)](#-configuração-de-ambiente)
+- [Scripts Disponíveis](#-scripts-disponíveis)
+- [Testes](#-testes)
+- [Endpoints Principais](#-endpoints-principais)
 
 ---
 
-## ⚙️ Como Rodar o Projeto
+## ✨ Funcionalidades
+
+### 🔐 Autenticação e Segurança
+- **Login Seguro:** Autenticação via **JWT (JSON Web Token)**.
+- **Controle de Acesso (RBAC):** Diferenciação entre perfis `User` e `Admin`.
+- **Proteção:**
+  - **Rate Limiting:** Proteção contra ataques de força bruta e DDoS.
+  - **Sanitização:** Validação rigorosa de dados de entrada (`express-validator`).
+  - **Criptografia:** Senhas hashadas com `bcryptjs`.
+
+### 🎮 Gamificação e Engajamento
+- **Sistema de Níveis:** Usuários ganham pontos e sobem de nível ao atingir metas.
+- **Metas Dinâmicas:** Desafios (diários, semanais, mensais) que recompensam o usuário.
+- **Ranking:** Classificação de usuários por desempenho (Global, Mensal, Semanal).
+
+### 📈 Impacto e Indicações
+- **Gestão de Indicações:** Ciclo completo de indicação (criação -> validação -> recompensa).
+- **Cálculo de Impacto:** Lógica complexa que calcula renda gerada e bolsas concedidas em tempo real.
+- **Feedback Financeiro:** Verificação automática de elegibilidade para saque de recompensas.
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+O projeto foi construído com uma stack moderna e focada em performance e manutenção:
+
+- **Core:** `Node.js` (v18+), `Express`
+- **Banco de Dados:** `PostgreSQL`, `Sequelize` (ORM)
+- **Segurança:** `BCrypt`, `JWT`, `Express Rate Limit`, `CORS`
+- **Validação:** `Express Validator`
+- **Testes:** `Jest` (Unitários e Integração)
+- **Utilitários:** `Dotenv`, `Nodemon`
+
+---
+
+## 🏗️ Arquitetura do Projeto
+
+O código segue o padrão **MVC (Model-View-Controller)** estendido com uma camada de **Services**, garantindo separação de responsabilidades e regras de negócio limpas.
+
+Utilizamos a seguinte organização de pastas:
+
+```tree
+src/
+├── controllers/    # Camada de requisições: Recebe e envia dados, chama Services.
+├── services/       # Camada de Negócio: Contém a lógica complexa (Gamificação, Impacto, Metas).
+├── models/         # Definição das tabelas e relacionamentos via Sequelize.
+├── routes/         # Definição e agrupamento de todas as rotas da API.
+├── middlewares/    # Funções que rodam antes dos Controllers (Auth, Rate Limiter, Validadores).
+├── utils/          # Funções auxiliares (Formatadores de CPF/Telefone, Helpers para Metas).
+├── database/       # Configuração da conexão com PostgreSQL/Sequelize e sync.
+├── app.js          # Configuração principal do Express e aplicação dos middlewares globais.
+└── server.js       # Ponto de entrada do servidor (configura variáveis de ambiente e inicia).
+```
+---
+
+## ⚙️ Pré-requisitos e Instalação
 
 ### 1. Pré-requisitos
+- **Node.js** instalado (Recomendado v18 ou superior)
+- **PostgreSQL** rodando localmente ou na nuvem (ex: Render, Supabase, Neon)
 
-- **Node.js** instalado (>= 18.x recomendado)  
-- **PostgreSQL** instalado localmente ou via cloud (ex: Render, Supabase)  
-
----
-
-### 2. Clonar o Repositório
+### 2. Instalação
 
 ```bash
-git clone https://github.com/limaamorim/Proleduca_Backend
+# Clone o repositório
+git clone [https://github.com/limaamorim/Proleduca_Backend](https://github.com/limaamorim/Proleduca_Backend)
+
+# Entre na pasta
 cd Proleduca_Backend
-```
 
----
-
-### 3. Instalar Dependências
-
-```bash
+# Instale as dependências
 npm install
 ```
-
 ---
 
-### 4. Configurar Variáveis de Ambiente
+## 🔐 Configuração de Ambiente##
+- Crie um arquivo .env na raiz do projeto seguindo o exemplo abaixo:
 
-Crie um arquivo `.env` na raiz do projeto com as seguintes chaves:
-
-```env
+```bash
 # Servidor
 PORT=3000
 
-# Banco de Dados (exemplo Render/Supabase)
-DB_HOST=seu_host
+# Banco de Dados
+DB_HOST=localhost
 DB_PORT=5432
 DB_USER=seu_usuario
 DB_PASS=sua_senha
-DB_NAME=seu_banco
+DB_NAME=nome_do_banco
+
+# Segurança (JWT)
+JWT_SECRET=sua_chave_super_secreta
+JWT_EXPIRES=1d
+
 ```
-
----
-
-### 5. Rodar o Servidor
-
-Modo **desenvolvimento** (com Nodemon):
-```bash
-npm run dev
-```
-
-Modo **produção**:
-```bash
-npm start
-```
-
----
-
-## 🌐 Endpoints Disponíveis
-
-- `GET /` → Rota de teste (retorna mensagem "Amigo Edu API v1.0 está no ar 🚀")  
-- `POST /api/v1/auth/cadastro` → (em construção)  
-- `POST /api/v1/auth/login` → (em construção)  
-
 ---
 
 ## 📡 Testar Conexão com Banco
@@ -91,20 +124,59 @@ Se estiver tudo certo, você verá no console:
 ✅ CONEXÃO COM POSTGRES ESTABELECIDA COM SUCESSO!
 Servidor rodando em http://localhost:3000
 ```
-
 ---
 
-## 📜 Scripts Úteis
+## 📜 Scripts Disponíveis
+- No terminal, você pode executar os seguintes comandos:
 
-- `npm run dev` → roda com Nodemon (hot reload)  
-- `npm start` → roda em produção (Node puro)  
+```bash
+comando             descrição
+npm run dev	        #Inicia o servidor em modo de desenvolvimento (com Nodemon)
 
----
+npm start	        #Inicia o servidor em modo de produção
 
-## 📝 Próximos Passos
+npm run sync-db	    #Sincroniza os modelos do Sequelize com o Banco de Dados
 
-- Implementar rotas de autenticação em `routes/auth.routes.js`  
-- Criar modelos Sequelize (User, Indicação, Gamificação, etc.)  
-- Adicionar testes automatizados  
+npm test	        #Executa a suíte de testes com Jest
 
----
+npm run test:       #coverage Gera relatório de cobertura de testes
+
+```
+
+## 🌐 Endpoints Principais
+Abaixo estão listadas as rotas principais da API. <br>
+
+Nota: A maioria das rotas exige o cabeçalho Authorization: Bearer <token>. <br>
+
+## 👤 Autenticação & Usuários
+`POST /api/v1/auth/login` - Login (User e Admin)
+
+`POST /api/v1/usuarios` - Cadastro de Usuário
+
+`GET /api/v1/usuarios/:id` - Perfil detalhado (inclui gamificação e impacto)
+
+## 🎯 Gamificação & Metas
+`GET /api/v1/gamificacao/usuario/:id` - Ver nível e pontos
+
+`GET /api/v1/metas` - Listar metas disponíveis
+
+`GET /api/v1/metas/usuario/:id` - Ver progresso nas metas
+
+## 🤝 Indicações
+`POST /api/v1/indicacoes` - Criar nova indicação
+
+`GET /api/v1/indicacoes` - Listar indicações
+
+`POST /api/v1/indicacoes/:id/validar` - (Admin) Validar indicação e gerar recompensas
+
+## 🏆 Ranking
+`GET /api/v1/ranking/semanal` - Ranking da semana
+
+`GET /api/v1/ranking/todos` - Ranking global
+
+## 🛡️ Administração
+`GET /api/v1/admins/usuario` - Gestão completa de usuários
+
+`PATCH /api/v1/admins/usuario/:id/suspender` - Suspender contas
+
+`PUT /api/v1/config/:chave` - Ajustar parâmetros do sistema (ex: valor da recompensa)
