@@ -41,7 +41,6 @@ module.exports = {
       });
 
       return res.json(resposta);
-
     } catch (err) {
       return res.status(500).json({ error: err.message });
     }
@@ -142,5 +141,4 @@ module.exports = {
       return res.status(500).json({ error: err.message });
     }
   }
-
 };

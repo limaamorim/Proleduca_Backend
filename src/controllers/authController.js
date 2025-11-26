@@ -8,7 +8,6 @@ const JWT_SECRET = process.env.JWT_SECRET || "dev-secret";
 const TOKEN_EXPIRES = process.env.JWT_EXPIRES || "1d";
 
 module.exports = {
-
     async login(req, res) {
         try {
             const { email, senha } = req.body;
