@@ -6,6 +6,6 @@ const {  autenticarUsuario, somenteAdmin } = require('../middlewares/auth.js');
 const routes = Router();
 
 routes.get('/', autenticarUsuario, somenteAdmin, controller.listar);
-routes.put('/:chave', autenticarUsuario, somenteAdmin, controller.upsert);
+routes.put('/:chave', autenticarUsuario, somenteAdmin, controller.configurar);
 
 module.exports = routes;

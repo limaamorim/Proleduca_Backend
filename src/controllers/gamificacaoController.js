@@ -8,7 +8,7 @@ module.exports = {
     try {
       const usuario_id = req.params.usuario_id;
 
-      const gamificacao = await gamificacaoService.getByUsuario(usuario_id);
+      const gamificacao = await gamificacaoService.buscarPorUsuario(usuario_id);
       const pontosProximoNivel = gamificacaoService.pontosParaProximoNivel(gamificacao.nivel);
 
       return res.json({
@@ -34,10 +34,7 @@ module.exports = {
 
       const resultado = await gamificacaoService.adicionarPontos(
         usuario_id,
-        pontos,
-        async (meta, t) => {
-          // Aqui você poderia integrar com impacto/notificações/logs
-        }
+        pontos
       );
 
       return res.json({

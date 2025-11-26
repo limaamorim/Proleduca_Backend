@@ -22,7 +22,7 @@ module.exports = {
    * PUT /api/v1/config/:chave
    * body { valor: "..." }
    */
-  async upsert(req, res) {
+  async configurar(req, res) {
     try {
       const chave = req.params.chave;
       const { valor } = req.body;

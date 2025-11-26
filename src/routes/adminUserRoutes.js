@@ -9,7 +9,7 @@ const routes = Router();
 routes.use(autenticarUsuario, somenteAdmin);
 routes.get('/', adminUserController.listar); 
 routes.get('/:id', adminUserController.obter); 
-routes.patch('/:id/suspend', adminUserController.suspend);
+routes.patch('/:id/suspender', adminUserController.suspender);
 routes.delete('/:id', adminUserController.deletar);        
 
 module.exports = routes;

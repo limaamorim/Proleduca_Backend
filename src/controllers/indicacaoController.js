@@ -77,9 +77,9 @@ module.exports = {
     const id = req.params.id;
     const adminId = req.user?.id ? Number(req.user.id) : null;
 
-    return await connection.transaction(async (t) => {
+    return await connection.transaction(async (transacao) => {
       try {
-        const indicacao = await Indicacao.findByPk(id, { transaction: t });
+        const indicacao = await Indicacao.findByPk(id, { transaction: transacao });
 
         if (!indicacao) {
           return res.status(404).json({ error: 'Indicação não encontrada' });
@@ -95,27 +95,27 @@ module.exports = {
         indicacao.validada_por_admin_id = adminId;
         indicacao.atualizado_em = new Date();
 
-        await indicacao.save({ transaction: t });
+        await indicacao.save({ transaction: transacao });
 
         // Atualiza impacto
-        const impacto = await impactoService.recomputeImpactForUser(
+        const impacto = await impactoService.recalcularImpactoUsuario(
           indicacao.usuario_id,
           t
         );
 
         // Avalia metas do usuário
-        await metaService.evaluateMetasForUser(
+        await metaService.avaliarMetasDoUsuario(
           indicacao.usuario_id,
           t
         );
 
         // Busca configuração opcional de pontos
-        const cfg = await Config.findOne({
+        const configuracao = await Config.findOne({
           where: { chave: 'pontos_por_indicacao' },
-          transaction: t
+          transaction: transacao
         });
 
-        const pontosPorIndicacao = cfg ? Number(cfg.valor) : 0;
+        const pontosPorIndicacao = configuracao ? Number(configuracao.valor) : 0;
 
         let gamificacaoResultado = null;
 
@@ -124,7 +124,7 @@ module.exports = {
             indicacao.usuario_id,
             pontosPorIndicacao,
             null,
-            t
+            transacao
           );
         }
 

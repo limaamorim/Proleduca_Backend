@@ -4,7 +4,6 @@ const { connection } = require('../database');
 
 /**
  * Regra simples para calcular os pontos necessários para avançar de nível.
- * Pode ser parametrizada no futuro.
  */
 function pontosNecessariosParaProximoNivel(nivelAtual) {
   return nivelAtual * 100;
@@ -12,8 +11,6 @@ function pontosNecessariosParaProximoNivel(nivelAtual) {
 
 /**
  * Adiciona pontos ao usuário.
- * - Pode usar uma transação externa (para operações atômicas em outras ações do sistema).
- * - metaCallback executa ações adicionais dentro da mesma transação.
  */
 async function adicionarPontos(
   usuarioId,
@@ -27,7 +24,6 @@ async function adicionarPontos(
   let criouTransacao = false;
 
   try {
-    // Verifica se já veio uma transação externa
     if (transacaoExterna) {
       transacao = transacaoExterna;
     } else {
@@ -35,13 +31,11 @@ async function adicionarPontos(
       criouTransacao = true;
     }
 
-    // Busca registro de gamificação do usuário
     let gamificacao = await Gamificacao.findOne({
       where: { usuario_id: usuarioId },
       transaction: transacao
     });
 
-    // Se não existir, cria
     if (!gamificacao) {
       gamificacao = await Gamificacao.create(
         { usuario_id: usuarioId, pontos: 0 },
@@ -49,13 +43,10 @@ async function adicionarPontos(
       );
     }
 
-    // Soma os pontos
-    gamificacao.pontos =
-      Number(gamificacao.pontos) + Number(pontosParaAdicionar);
+    gamificacao.pontos = Number(gamificacao.pontos) + Number(pontosParaAdicionar);
 
     let subiuDeNivel = false;
 
-    // Verifica múltiplos níveis (caso receba muitos pontos)
     while (gamificacao.pontos >= pontosNecessariosParaProximoNivel(gamificacao.nivel)) {
       gamificacao.pontos -= pontosNecessariosParaProximoNivel(gamificacao.nivel);
       gamificacao.nivel += 1;
@@ -67,7 +58,6 @@ async function adicionarPontos(
 
     await gamificacao.save({ transaction: transacao });
 
-    // Callback opcional executado dentro da mesma transação
     if (metaCallback) {
       await metaCallback(
         { usuarioId, pontos: pontosParaAdicionar, subiuDeNivel, gamificacao },
@@ -79,7 +69,8 @@ async function adicionarPontos(
 
     return {
       gamificacao,
-      subiuDeNivel
+      subiuDeNivel,
+      leveled: subiuDeNivel 
     };
   } catch (erro) {
     if (criouTransacao && transacao) await transacao.rollback();
@@ -89,12 +80,9 @@ async function adicionarPontos(
 
 /**
  * Retorna a gamificação de um usuário.
- * Se não existir, cria automaticamente.
  */
 async function buscarPorUsuario(usuarioId) {
-  let gamificacao = await Gamificacao.findOne({
-    where: { usuario_id: usuarioId }
-  });
+  let gamificacao = await Gamificacao.findOne({ where: { usuario_id: usuarioId } });
 
   if (!gamificacao) {
     gamificacao = await Gamificacao.create({ usuario_id: usuarioId });

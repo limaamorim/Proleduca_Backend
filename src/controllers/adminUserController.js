@@ -18,7 +18,7 @@ module.exports = {
       });
 
       // Obtém todos os IDs
-      const idsUsuarios = usuarios.map(u => u.id);
+      const idsUsuarios = usuarios.map(usuario => usuario.id);
 
       // Busca gamificação de todos os usuários em lote
       const gamificacoes = idsUsuarios.length
@@ -30,11 +30,11 @@ module.exports = {
 
       // Cria mapa de gamificações { usuario_id -> dados }
       const mapaGamificacao = new Map();
-      gamificacoes.forEach(g => mapaGamificacao.set(g.usuario_id, g.toJSON()));
+      gamificacoes.forEach(gamificacao => mapaGamificacao.set(gamificacao.usuario_id, gamificacao.toJSON()));
 
       // Monta resposta final
-      const resposta = usuarios.map(u => {
-        const json = u.toJSON();
+      const resposta = usuarios.map(usuarios => {
+        const json = usuarios.toJSON();
         json.idade = json.data_nascimento ? calcularIdade(json.data_nascimento) : null;
         json.gamificacao = mapaGamificacao.get(json.id) || null;
         return json;
@@ -91,7 +91,7 @@ module.exports = {
   },
 
   // Suspender ou reativar usuário
-  async suspend(req, res) {
+  async suspender(req, res) {
     try {
       const id = Number(req.params.id);
       const { suspended } = req.body; // booleano
@@ -106,8 +106,8 @@ module.exports = {
       if (!usuario) {
         return res.status(404).json({ error: 'Usuário não encontrado.' });
       }
-
-      usuario.suspended = suspended;
+      const suspenso = typeof req.body.suspenso !== 'undefined' ? req.body.suspenso : req.body.suspended;
+      usuario.suspenso = suspenso;
       usuario.atualizado_em = new Date();
       await usuario.save();
 
