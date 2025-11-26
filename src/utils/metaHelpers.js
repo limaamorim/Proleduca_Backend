@@ -8,22 +8,19 @@ const impactoService = require('../services/impactoService');
 const gamificacaoService = require('../services/gamificacaoService');
 
 /**
- * Fallbacks robustos para funções de serviço (PT 
+ * Fallbacks robustos para funções de serviço
  */
 const impactoAdicionarRecompensa =
-  (impactoService && (impactoService.adicionarRecompensa)) 
+  (impactoService &&
+    (impactoService.adicionarRecompensa ||
+     impactoService.addReward ||
+     impactoService.add_recompensa)) || null;
 
 const gamificacaoAdicionarPontos =
-  (gamificacaoService && (gamificacaoService.adicionarPontos)) 
-
-/**
- * Fallbacks robustos para funções de serviço (PT / EN)
- */
-const impactoAdicionarRecompensa =
-  (impactoService && (impactoService.adicionarRecompensa || impactoService.addReward || impactoService.add_recompensa)) || null;
-
-const gamificacaoAdicionarPontos =
-  (gamificacaoService && (gamificacaoService.adicionarPontos || gamificacaoService.addPoints || gamificacaoService.addPontos || gamificacaoService.adicionarPontos)) || null;
+  (gamificacaoService &&
+    (gamificacaoService.adicionarPontos ||
+     gamificacaoService.addPoints ||
+     gamificacaoService.addPontos)) || null;
 
 /**
  * Retorna metas ativas (considerando validade) dentro de uma transação opcional
@@ -97,10 +94,13 @@ async function obterOuCriarUsuarioMeta(usuarioId, metaId, transacao = null) {
 async function atualizarUsuarioMeta(usuarioMeta, qtdValidadas, meta, janela = null, transacao = null) {
   let precisarResetar = false;
   let periodoInicio = null, periodoFim = null;
+
   if (janela) {
     periodoInicio = janela.inicio;
     periodoFim = janela.fim;
-    if (!usuarioMeta.periodo_inicio || new Date(usuarioMeta.periodo_inicio).getTime() < periodoInicio.getTime()) {
+
+    if (!usuarioMeta.periodo_inicio ||
+        new Date(usuarioMeta.periodo_inicio).getTime() < periodoInicio.getTime()) {
       precisarResetar = true;
     }
   }
@@ -130,40 +130,42 @@ async function atualizarUsuarioMeta(usuarioMeta, qtdValidadas, meta, janela = nu
 }
 
 /**
- * Aplica recompensa (financeira + pontos) — e garante metas_batidas++
- * Mesmo se os pontos não causarem level-up, o campo metas_batidas será incrementado.
+ * Aplica recompensa (financeira + pontos)
  */
 async function aplicarRecompensaSeNecessaria(usuarioId, usuarioMeta, meta, transacao = null) {
   if (!usuarioMeta.completado) return usuarioMeta;
   if (Boolean(usuarioMeta.ganho_creditado)) return usuarioMeta;
 
-  // 1) Impacto — usa a função disponível
+  // Impacto
   if (!impactoAdicionarRecompensa) {
-    throw new Error('Função de adicionar recompensa não encontrada em impactoService. Verifique exports e nome do arquivo.');
+    throw new Error('Função de adicionar recompensa não encontrada em impactoService.');
   }
   await impactoAdicionarRecompensa(usuarioId, Number(meta.recompensa), transacao);
 
-  // 2) Pontos — usa a função disponível e captura resultado
+  // Pontos
   const pontos = Math.round(Number(meta.recompensa || 0));
   let resultadoGamificacao = null;
+
   if (pontos > 0) {
     if (!gamificacaoAdicionarPontos) {
-      throw new Error('Função de adicionar pontos não encontrada em gamificacaoService. Verifique exports e nome do arquivo.');
+      throw new Error('Função de adicionar pontos não encontrada em gamificacaoService.');
     }
     resultadoGamificacao = await gamificacaoAdicionarPontos(usuarioId, pontos, null, transacao);
   }
 
-  // 3) Garantir incremento de metas_batidas:
-  const subiu = resultadoGamificacao && (resultadoGamificacao.subiuDeNivel === true || resultadoGamificacao.leveled === true);
+  const subiu = resultadoGamificacao &&
+                (resultadoGamificacao.subiuDeNivel === true ||
+                 resultadoGamificacao.leveled === true);
+
+  // Incrementa metas_batidas se não subiu de nível
   if (!subiu) {
-    // localizar registro de gamificacao e incrementar metas_batidas em transacao
     const gamificacao = await Gamificacao.findOne({ where: { usuario_id: usuarioId }, transaction: transacao });
+
     if (gamificacao) {
       gamificacao.metas_batidas = Number(gamificacao.metas_batidas || 0) + 1;
       gamificacao.atualizado_em = new Date();
       await gamificacao.save({ transaction: transacao });
     } else {
-      // cria registro caso não exista (e já incrementa)
       await Gamificacao.create({
         usuario_id: usuarioId,
         nivel: 1,
@@ -175,7 +177,7 @@ async function aplicarRecompensaSeNecessaria(usuarioId, usuarioMeta, meta, trans
     }
   }
 
-  // 4) marca ganho como creditado no usuarioMeta
+  // Marca como creditado
   usuarioMeta.ganho_creditado = true;
   usuarioMeta.atualizado_em = new Date();
   await usuarioMeta.save({ transaction: transacao });
