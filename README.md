@@ -23,7 +23,7 @@ Este projeto é uma **API RESTful** desenvolvida em **Node.js** com arquitetura 
 
 ### 🔐 Autenticação e Segurança
 - **Login Seguro:** Autenticação via **JWT (JSON Web Token)**.
-- **Controle de Acesso (RBAC):** Diferenciação entre perfis `User` e `Admin`.
+- **Controle de Acesso:** Diferenciação entre perfis `User` e `Admin`.
 - **Proteção:**
   - **Rate Limiting:** Proteção contra ataques de força bruta e DDoS.
   - **Sanitização:** Validação rigorosa de dados de entrada (`express-validator`).
