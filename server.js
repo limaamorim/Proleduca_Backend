@@ -4,7 +4,7 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-// Importa testConnection de src/database (garanta que o arquivo exporte)
+// Importa testConnection de src/database 
 const { testConnection } = require('./src/database');
 
 const PORT = process.env.PORT || 3333;
