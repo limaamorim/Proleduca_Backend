@@ -4,19 +4,17 @@ const Meta = require('../models/Meta');
 const UsuarioMeta = require('../models/UsuarioMeta');
 const Indicacao = require('../models/Indicacao');
 const Gamificacao = require('../models/Gamificacao');
+const impactoService = require('../services/impactoService');
+const gamificacaoService = require('../services/gamificacaoService');
 
-let impactoService;
-let gamificacaoService;
-try {
-  impactoService = require('../services/impactoService');
-} catch (e1) {
-  try { impactoService = require('../services/impactService'); } catch (e2) { impactoService = null; }
-}
-try {
-  gamificacaoService = require('../services/gamificacaoService');
-} catch (e) {
-  gamificacaoService = null;
-}
+/**
+ * Fallbacks robustos para funções de serviço (PT 
+ */
+const impactoAdicionarRecompensa =
+  (impactoService && (impactoService.adicionarRecompensa)) 
+
+const gamificacaoAdicionarPontos =
+  (gamificacaoService && (gamificacaoService.adicionarPontos)) 
 
 /**
  * Fallbacks robustos para funções de serviço (PT / EN)
