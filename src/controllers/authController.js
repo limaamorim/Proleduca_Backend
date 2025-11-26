@@ -60,7 +60,7 @@ module.exports = {
             }
 
             // Verifica se a conta está suspensa
-            if (usuario.suspended) {
+            if (usuario.suspended || usuario.suspenso) {
                 return res.status(403).json({
                     message: "Sua conta está suspensa. Entre em contato com o suporte."
                 });

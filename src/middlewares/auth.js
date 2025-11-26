@@ -35,7 +35,7 @@ async function autenticarUsuario(req, res, next) {
     if (!usuario)
       return res.status(401).json({ error: 'Usuário não encontrado.' });
 
-    const usuarioSuspenso = (typeof user.suspenso !== 'undefined') ? user.suspenso : user.suspended;
+    const usuarioSuspenso = (typeof usuario.suspenso !== 'undefined') ? usuario.suspenso : usuario.suspended;
       if (usuarioSuspenso) return res.status(403).json({ error: 'Conta suspensa. Contate o administrador.' });
   }
 
