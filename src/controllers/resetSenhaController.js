@@ -1,5 +1,7 @@
 const Usuario = require("../models/Usuario");
 const bcrypt = require("bcryptjs");
+const nodemailer = require("nodemailer");
+
 
 module.exports = {
   async enviarCodigo(req, res) {
@@ -18,11 +20,25 @@ module.exports = {
       // Salva no banco
       await usuario.update({
         reset_code: codigo,
-        reset_expires: Date.now() + 5 * 60 * 1000 // 5 minutos
+        reset_expires: Date.now() + 5 * 60 * 1000
       });
 
-      console.log("Código enviado:", codigo); 
-      // depois você adiciona nodemailer aqui
+      // 🔥 CONFIGURA NODMAILER AQUI:
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+      });
+
+      await transporter.sendMail({
+        from: `Proleduca <${process.env.EMAIL_USER}>`,
+        to: email,
+        subject: "Seu código de recuperação de senha",
+        text: `Seu código é: ${codigo}`,
+        html: `<h1>Seu código é: ${codigo}</h1>`,
+      });
 
       return res.json({ message: "Código enviado!" });
 
@@ -31,6 +47,7 @@ module.exports = {
       return res.status(500).json({ error: "Erro ao enviar código" });
     }
   },
+
 
   async verificarCodigo(req, res) {
     try {
