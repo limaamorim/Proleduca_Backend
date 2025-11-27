@@ -84,7 +84,7 @@ src/
 
 ```bash
 # Clone o repositório
-git clone [https://github.com/limaamorim/Proleduca_Backend](https://github.com/limaamorim/Proleduca_Backend)
+git clone https://github.com/limaamorim/Proleduca_Backend
 
 # Entre na pasta
 cd Proleduca_Backend
@@ -180,3 +180,17 @@ Nota: A maioria das rotas exige o cabeçalho Authorization: Bearer <token>. <br>
 `PATCH /api/v1/admins/usuario/:id/suspender` - Suspender contas
 
 `PUT /api/v1/config/:chave` - Ajustar parâmetros do sistema (ex: valor da recompensa)
+
+---
+
+## 🔗 Integração com o Backend
+Este repositório trabalha em conjunto com o frontend:  
+👉 [AmigoEdu-frontend](https://github.com/Juh-MM/AmigoEdu-frontend)
+
+---
+
+## 👨‍💻 Equipe
+- Frontend: Cauã Souza, Glewbber Júnior, Júlia Martins e Thymos Victor  
+- Backend: Felipe Ricardo(QA e Dev), Fernando(Dev) e João Italo(Dev e Banco)  
+- UI/UX: Cauã Souza, Júlia Martins e Thymos Victor  
+- Stakeholders: [ProlEduca](https://www.proleduca.com.br/)
