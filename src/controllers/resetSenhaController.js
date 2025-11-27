@@ -1,8 +1,6 @@
 const Usuario = require("../models/Usuario");
 const bcrypt = require("bcryptjs");
-const { Resend } = require("resend");
-
-const resend = new Resend(process.env.RESEND_KEY);
+const nodemailer = require("nodemailer");
 
 module.exports = {
   async enviarCodigo(req, res) {
@@ -10,7 +8,6 @@ module.exports = {
       const { email } = req.body;
 
       const usuario = await Usuario.findOne({ where: { email } });
-
       if (!usuario) {
         return res.status(404).json({ error: "E-mail não encontrado" });
       }
@@ -18,34 +15,36 @@ module.exports = {
       // Gera código
       const codigo = Math.floor(1000 + Math.random() * 9000).toString();
 
-      // Salva no banco
+      // Atualiza no banco
       await usuario.update({
         reset_code: codigo,
         reset_expires: Date.now() + 5 * 60 * 1000,
       });
 
-      // 🔥 Envia e-mail usando Resend (SEM SMTP)
-      await resend.emails.send({
-        from: "Proleduca <no-reply@proleduca.com>",
+      // 🔥 Nodemailer com Gmail SMTP
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: process.env.EMAIL_USER,   // seu gmail
+          pass: process.env.EMAIL_PASS,   // senha de app
+        },
+      });
+
+      // Envia o e-mail
+      await transporter.sendMail({
+        from: `Proleduca <${process.env.EMAIL_USER}>`,
         to: email,
         subject: "Seu código de recuperação de senha",
-        html: `
-          <div style="font-family: Arial; text-align: center;">
-            <h2>🔐 Recuperação de senha</h2>
-            <p>Seu código de verificação é:</p>
-            <h1 style="font-size: 32px; letter-spacing: 6px;">${codigo}</h1>
-            <p>O código expira em 5 minutos.</p>
-          </div>
-        `,
+        html: `<h1>Seu código é: ${codigo}</h1>`,
       });
 
       return res.json({ message: "Código enviado!" });
-
     } catch (err) {
       console.error("🔥 ERRO AO ENVIAR CÓDIGO:", err);
-      return res
-        .status(500)
-        .json({ error: "Erro ao enviar código", detail: err.message });
+      return res.status(500).json({
+        error: "Erro ao enviar código",
+        detail: err.message,
+      });
     }
   },
 
@@ -55,17 +54,12 @@ module.exports = {
 
       const usuario = await Usuario.findOne({ where: { email } });
 
-      if (!usuario) {
-        return res.status(404).json({ error: "Usuário não encontrado" });
-      }
-
-      if (usuario.reset_code !== codigo) {
+      if (!usuario) return res.status(404).json({ error: "Usuário não encontrado" });
+      if (usuario.reset_code !== codigo)
         return res.status(400).json({ error: "Código incorreto" });
-      }
 
-      if (usuario.reset_expires < Date.now()) {
+      if (usuario.reset_expires < Date.now())
         return res.status(400).json({ error: "Código expirado" });
-      }
 
       return res.json({ message: "Código válido!" });
     } catch (err) {
@@ -79,10 +73,7 @@ module.exports = {
       const { email, senha } = req.body;
 
       const usuario = await Usuario.findOne({ where: { email } });
-
-      if (!usuario) {
-        return res.status(404).json({ error: "Usuário não encontrado" });
-      }
+      if (!usuario) return res.status(404).json({ error: "Usuário não encontrado" });
 
       const senhaHash = await bcrypt.hash(senha, 10);
 
