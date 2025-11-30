@@ -15,9 +15,8 @@ const metaRoutes = require('./routes/metaRoutes');
 const gamificacaoRoutes = require('./routes/gamificacaoRoutes');
 const adminUserRoutes = require('./routes/adminUserRoutes');
 
-
 // Importação dos limiters
-const { generalLimiter, authLimiter, resetLimiter } = require('./middlewares/rateLimiter');
+const { generalLimiter, authLimiter } = require('./middlewares/rateLimiter');
 
 const app = express();
 dotenv.config();
@@ -25,16 +24,6 @@ dotenv.config();
 // Middlewares base
 app.use(cors());
 app.use(express.json());
-
-// ============================================================
-//  Rotas de reset de senha (SEM generalLimiter)
-// ============================================================
-app.use('/api/v1/recuperar-senha', resetLimiter, resetSenhaRoutes);
-
-// ============================================================
-//  AGORA aplica o generalLimiter no restante da API
-// ============================================================
-app.use(generalLimiter);
 
 // ============================================================
 //  Rota inicial
@@ -48,6 +37,11 @@ app.get('/', (req, res) => {
 // ============================================================
 app.use('/api/v1/auth', authLimiter);
 app.use('/api/v1/auth', authRoutes);
+
+// ============================================================
+//  Aplica limiter geral no restante
+// ============================================================
+app.use(generalLimiter);
 
 // ============================================================
 //  Demais rotas
