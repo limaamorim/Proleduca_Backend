@@ -5,6 +5,7 @@ const Gamificacao = require('../models/Gamificacao');
 const Impacto = require('../models/Impacto');
 const { calcularIdade } = require('../utils/calculoDeIdade');
 const { formatarCPF, formatarTelefone } = require('../utils/formatters');
+const { gerarHashIndicacao } = require('../utils/gerarHash'); // <--- IMPORTADO
 
 module.exports = {
 
@@ -19,7 +20,10 @@ module.exports = {
       const senhaCriptografada = await bcrypt.hash(senha, 10);
       const cpfFormatado = formatarCPF(cpf);
       const telefoneFormatado = formatarTelefone(telefone);
-      const linkIndicacao = `https://amigoedu.com/indicacao/${cpfFormatado}`;
+
+      // 🔥 GERAR HASH ÚNICO PARA INDICAÇÃO (NÃO USA MAIS CPF)
+      const hashIndicacao = gerarHashIndicacao();
+      const linkIndicacao = `https://amigoedu.com/indicacao/${hashIndicacao}`;
 
       const novoUsuario = await Usuario.create({
         nome,
