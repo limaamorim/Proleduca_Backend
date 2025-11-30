@@ -14,7 +14,7 @@ const impactoRoutes = require('./routes/impactoRoutes');
 const metaRoutes = require('./routes/metaRoutes');
 const gamificacaoRoutes = require('./routes/gamificacaoRoutes');
 const adminUserRoutes = require('./routes/adminUserRoutes');
-const resetSenhaRoutes = require('./routes/resetSenhaRoutes');
+
 
 // Importação dos limiters
 const { generalLimiter, authLimiter, resetLimiter } = require('./middlewares/rateLimiter');
