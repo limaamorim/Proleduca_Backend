@@ -3,6 +3,7 @@ const cors = require('cors');
 require('./database'); 
 const dotenv = require('dotenv');
 
+// Importação de rotas
 const configRoutes = require('./routes/configGamificacaoRoutes');
 const authRoutes = require('./routes/authRoutes'); 
 const usuarioRoutes = require('./routes/usuarioRoutes'); 
@@ -14,24 +15,43 @@ const metaRoutes = require('./routes/metaRoutes');
 const gamificacaoRoutes = require('./routes/gamificacaoRoutes');
 const adminUserRoutes = require('./routes/adminUserRoutes');
 const resetSenhaRoutes = require('./routes/resetSenhaRoutes');
-const { generalLimiter, authLimiter } = require('./middlewares/rateLimiter');
 
-
+// Importação dos limiters
+const { generalLimiter, authLimiter, resetLimiter } = require('./middlewares/rateLimiter');
 
 const app = express();
-dotenv.config()
+dotenv.config();
 
+// Middlewares base
 app.use(cors());
-app.use(express.json()); 
+app.use(express.json());
 
-app.use(generalLimiter); 
+// ============================================================
+//  Rotas de reset de senha (SEM generalLimiter)
+// ============================================================
+app.use('/api/v1/recuperar-senha', resetLimiter, resetSenhaRoutes);
 
+// ============================================================
+//  AGORA aplica o generalLimiter no restante da API
+// ============================================================
+app.use(generalLimiter);
+
+// ============================================================
+//  Rota inicial
+// ============================================================
 app.get('/', (req, res) => {
     res.status(200).send({ message: 'Amigo Edu API v1.0 está no ar! 🚀' });
 });
 
+// ============================================================
+//  Rotas de autenticação (com limiter próprio)
+// ============================================================
 app.use('/api/v1/auth', authLimiter);
 app.use('/api/v1/auth', authRoutes);
+
+// ============================================================
+//  Demais rotas
+// ============================================================
 app.use('/api/v1/usuarios', usuarioRoutes);
 app.use('/api/v1/ranking', rankingRoutes);
 app.use('/api/v1/admins', adminRoutes);
@@ -41,7 +61,5 @@ app.use('/api/v1/impactos', impactoRoutes);
 app.use('/api/v1/metas', metaRoutes);
 app.use('/api/v1/gamificacao', gamificacaoRoutes);
 app.use('/api/v1/config', configRoutes);
-app.use('/api/v1/recuperar-senha', resetSenhaRoutes);
-
 
 module.exports = app;
