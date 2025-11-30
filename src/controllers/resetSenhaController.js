@@ -2,7 +2,8 @@ const Usuario = require("../models/Usuario");
 const bcrypt = require("bcryptjs");
 const { Resend } = require("resend");
 
-const resend = new Resend(process.env.RESEND_KEY);
+// usa a variável certa do .env
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 module.exports = {
   async enviarCodigo(req, res) {
@@ -14,18 +15,16 @@ module.exports = {
         return res.status(404).json({ error: "E-mail não encontrado" });
       }
 
-      // Gera código
       const codigo = Math.floor(1000 + Math.random() * 9000).toString();
 
-      // Salva no banco
       await usuario.update({
         reset_code: codigo,
         reset_expires: Date.now() + 5 * 60 * 1000,
       });
 
-      // Envia e-mail com Resend
+      // Usa a variável correta RESEND_FROM
       const resultado = await resend.emails.send({
-        from: `Proleduca <${process.env.EMAIL_FROM}>`,
+        from: process.env.RESEND_FROM,
         to: email,
         subject: "Seu código de recuperação de senha",
         html: `
@@ -67,17 +66,9 @@ module.exports = {
 
       const usuario = await Usuario.findOne({ where: { email } });
 
-      if (!usuario) {
-        return res.status(404).json({ error: "Usuário não encontrado" });
-      }
-
-      if (usuario.reset_code !== codigo) {
-        return res.status(400).json({ error: "Código incorreto" });
-      }
-
-      if (usuario.reset_expires < Date.now()) {
-        return res.status(400).json({ error: "Código expirado" });
-      }
+      if (!usuario) return res.status(404).json({ error: "Usuário não encontrado" });
+      if (usuario.reset_code !== codigo) return res.status(400).json({ error: "Código incorreto" });
+      if (usuario.reset_expires < Date.now()) return res.status(400).json({ error: "Código expirado" });
 
       return res.json({ message: "Código válido!" });
 
@@ -92,10 +83,7 @@ module.exports = {
       const { email, senha } = req.body;
 
       const usuario = await Usuario.findOne({ where: { email } });
-
-      if (!usuario) {
-        return res.status(404).json({ error: "Usuário não encontrado" });
-      }
+      if (!usuario) return res.status(404).json({ error: "Usuário não encontrado" });
 
       const senhaHash = await bcrypt.hash(senha, 10);
 
