@@ -9,7 +9,24 @@ const getKey = (req) => {
   return rateLimit.ipKeyGenerator(req);
 };
 
-// Configuração geral - aplicada em todas as rotas
+/* ===========================================
+   🔥 1) LIMITER ESPECIAL PARA RESET DE SENHA
+   Evita bloqueios injustos do generalLimiter
+=========================================== */
+const resetLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5 minutos
+  max: 5, // até 5 tentativas de enviar código
+  message: {
+    error: 'Muitas tentativas de recuperação de senha. Tente novamente em 5 minutos.',
+    retryAfter: '5 minutos'
+  },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+/* ===========================================
+   🔥 2) LIMITER GERAL (APLICADO EM TODAS ROTAS)
+=========================================== */
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, 
   max: 100, 
@@ -29,10 +46,10 @@ const generalLimiter = rateLimit({
   }
 });
 
-// Rate limiter para rotas de autenticação (login, registro, etc)
-// Mais restritivo para prevenir ataques de força bruta
+/* ===========================================
+   🔥 3) LIMITER DE AUTH (login / registro)
+=========================================== */
 const authLimiter = rateLimit({
-  
   windowMs: 15 * 60 * 1000, 
   max: 10, 
   message: {
@@ -50,11 +67,11 @@ const authLimiter = rateLimit({
       retryAfter: '15 minutos'
     });
   }
-
 });
 
-// Rate limiter para rotas protegidas (com autenticação)
-// Usuários autenticados têm limites mais altos
+/* ===========================================
+   🔥 4) LIMITER PARA ROTAS PROTEGIDAS
+=========================================== */
 const protectedLimiter = rateLimit({
 
   windowMs: 15 * 60 * 1000, 
@@ -70,9 +87,9 @@ const protectedLimiter = rateLimit({
     if (req.user?.id) {
       return `user_${req.user.id}`;
     }
-    // Usa ipKeyGenerator do express-rate-limit para tratar IPv6 corretamente
     return rateLimit.ipKeyGenerator(req);
   },
+  
   skip: (req) => {
     return !req.user;
   },
@@ -86,30 +103,35 @@ const protectedLimiter = rateLimit({
 
 });
 
-// Rate limiter estrito para operações sensíveis (ex: criação de recursos)
+/* ===========================================
+   🔥 5) LIMITER ESTRITO PARA OPERAÇÕES SENSÍVEIS
+=========================================== */
 const strictLimiter = rateLimit({
 
   windowMs: 60 * 60 * 1000, 
-  max: 100, 
+  max: 100,
   message: {
     error: 'Limite de operações excedido. Por favor, tente novamente em 1 hora.',
     retryAfter: '1 hora'
   },
   standardHeaders: true,
   legacyHeaders: false,
+
   handler: (req, res) => {
     res.status(429).json({
       error: 'Limite de operações excedido. Por favor, tente novamente em 1 hora.',
       retryAfter: '1 hora'
     });
   }
-  
 });
 
+/* ===========================================
+   🔥 EXPORTAÇÃO
+=========================================== */
 module.exports = {
   generalLimiter,
   authLimiter,
   protectedLimiter,
-  strictLimiter
+  strictLimiter,
+  resetLimiter
 };
-
